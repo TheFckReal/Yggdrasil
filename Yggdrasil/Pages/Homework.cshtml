@@ -1,0 +1,48 @@
+﻿@page
+@model Yggdrasil.Pages.HomeworkModel
+@{
+}
+
+<form id="homework-finished-form" method="post" asp-page="Homework">
+    @for (int i = 0; i < Model.Homeworks.Count; i++)
+    {
+        <h3>@Model.Homeworks[i].Subject</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Задание</th>
+                    <th scope="col">Дедлайн</th>
+                    <th scope="col">Сделано?</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@Model.Homeworks[i].Description</td>
+                    <td>@Model.Homeworks[i].Deadline</td>
+                    <td>
+                        @if (Model.Homeworks[i].Finished)
+                        {
+                                <input asp-for="@Model.Homeworks[i].Finished" class="form-check-input" type="checkbox">@*
+                        <label class="form-check-label" for="flexCheckChecked">
+
+                        </label> *@
+                        }
+                        else
+                        {
+                                <input asp-for="@Model.Homeworks[i].Finished" class="form-check-input" type="checkbox">
+                                @*  <label class="form-check-label" for="flexCheckDefault">
+                        Default checkbox
+                        </label> *@
+                        }
+                        <input type="hidden" asp-for="@Model.Homeworks[i].Deadline" />
+                        <input type="hidden" asp-for="@Model.Homeworks[i].Description" />
+                        <input type="hidden" asp-for="@Model.Homeworks[i].Id" />
+                        <input type="hidden" asp-for="@Model.Homeworks[i].Subject" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+    }
+    <input class="btn primary-button" type="submit" />
+</form>
