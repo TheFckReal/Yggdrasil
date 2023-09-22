@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Yggdrasil.Pages
+namespace Yggdrasil.Pages.Study
 {
     public class ScheduleModel : PageModel
     {

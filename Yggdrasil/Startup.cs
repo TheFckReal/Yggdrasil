@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.FileProviders;
+using Yggdrasil.DbModels;
+using Yggdrasil.Services;
 
 namespace Yggdrasil
 {
@@ -9,7 +11,14 @@ namespace Yggdrasil
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddRazorPages();
-            services.AddMvcCore();
+            services.Configure<RouteOptions>(options =>
+            {
+                options.AppendTrailingSlash = true;
+                options.LowercaseUrls = true;
+                options.LowercaseQueryStrings = true;
+            });
+            services.AddDbContext<StudyDbContext>();
+            services.AddTransient<IHomeworkService, HomeworkService>();
         }
 
         public void Configure(IApplicationBuilder app, IHostEnvironment env)
