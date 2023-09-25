@@ -27,6 +27,10 @@ namespace Yggdrasil.Pages.Study
                 return BadRequest();
             }
 
+            if (subjectName is not null)
+            {
+                subjectName = char.ToUpper(subjectName[0]) + subjectName.Substring(1);
+            }
             var receivedHomework = _homeworkService.GetHomework(id) ?? new Homework();
             Input = new InputModel()
             {

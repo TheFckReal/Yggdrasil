@@ -40,7 +40,7 @@
             </tbody>
         </table>
         <form method="get">
-            <input type="submit" class="btn primary-btn" asp-page="HomeworksUpdate" asp-route-id="@Model.Input[i].Homeworks[j].Id" asp-route-subjectname="@Model.Input[i].Homeworks[j].Id" value="Изменить"/>
+            <input type="submit" class="btn primary-btn" asp-page="HomeworksUpdate" asp-route-id="@Model.Input[i].Homeworks[j].Id" asp-route-subjectname="@Model.Input[i].Name" value="Изменить"/>
         </form>
         <button class="btn primary-btn">Удалить</button>
     }
