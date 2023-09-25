@@ -18,7 +18,7 @@ namespace Yggdrasil
                 options.LowercaseQueryStrings = true;
             });
             services.AddDbContext<StudyDbContext>();
-            services.AddScoped<IHomeworkService, HomeworkService>();
+            services.AddTransient<IHomeworkService, HomeworkService>();
         }
 
         public void Configure(IApplicationBuilder app, IHostEnvironment env)
