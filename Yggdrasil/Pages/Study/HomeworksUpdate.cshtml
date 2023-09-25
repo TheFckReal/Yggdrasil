@@ -1,0 +1,22 @@
+﻿@page "{id}/{subjectname?}"
+@model Yggdrasil.Pages.Study.HomeworksUpdateModel
+@{
+}
+<h1>@Model.Input.SubjectName</h1>
+@if (Model.Input.InputHomework is not null)
+{
+    <form method="post">
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Задание</span>
+            <input asp-for="@Model.Input.InputHomework.Description" class="form-control" aria-label="Description" aria-describedby="basic-addon1">
+            <span class="input-group-text" id="basic-addon1">Дедлайн</span>
+            <input type="datetime-local" asp-for="Input.InputHomework.Deadline" />
+            <span class="input-group-text" id="basic-addon1">Завершен?</span>
+            <input asp-for="@Model.Input.InputHomework.Finished" class="form-check-input" aria-describedby="basic-addon1" type="checkbox">
+        </div>
+    </form>
+}
+else
+{
+    <strong>Задания отсутствуют</strong>
+}
