@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -11,24 +12,66 @@ namespace Yggdrasil.Pages.Study
     public class HomeworkModel : PageModel
     {
         private readonly IHomeworkService _homeworkService;
-        public List<Subject> Subjects { get; set; }
-
         [BindProperty]
-        public List<Homework> homeworks { get; set; }
+        public List<InputModel> Input { get; set; }
+
         public HomeworkModel(IHomeworkService homeworkService)
         {
             _homeworkService = homeworkService;
+            var receivedSubjects = _homeworkService.GetSubjects();
+            Input = new List<InputModel>();
+            for (var i = 0; i < receivedSubjects.Count; i++)
+            {
+                Input.Add(new InputModel()
+                {
+                    Name = receivedSubjects[i].Name,
+                    SubjectId = receivedSubjects[i].Id,
+                    TeacherName = receivedSubjects[i].Name
+                });
+                Input[i].Homeworks = new List<InputModel.HomeworkInputModel>();
+                foreach (var receivedHomeworks in receivedSubjects[i].Homeworks)
+                {
+                    Input[i].Homeworks.Add(new()
+                    {
+                        Deadline = receivedHomeworks.Deadline,
+                        Description = receivedHomeworks.Description,
+                        Finished = receivedHomeworks.Finished,
+                        Id = receivedHomeworks.Id
+
+                    });
+                }
+            }
         }
 
-        public IActionResult OnGetAsync()
+        public IActionResult OnGet()
         {
-            Subjects = _homeworkService.GetSubjects();
             return Page();
         }
 
         public IActionResult OnPost()
         {
-            return Content(JsonSerializer.Serialize(homeworks));
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
+            return Content(JsonSerializer.Serialize(Input));
+        }
+
+        public class InputModel
+        {
+            public int SubjectId { get; set; }
+            public string Name { get; set; } = null!;
+            public string? TeacherName { get; set; }
+            public List<HomeworkInputModel> Homeworks { get; set; }
+
+            public class HomeworkInputModel
+            {
+                public int Id { get; set; }
+                public string? Description { get; set; }
+                public DateTime Deadline { get; set; }
+                [Required]
+                public bool Finished { get; set; }
+            }
         }
     }
 }
