@@ -18,6 +18,10 @@ namespace Yggdrasil.Pages.Study
         public HomeworkModel(IHomeworkService homeworkService)
         {
             _homeworkService = homeworkService;
+        }
+
+        public IActionResult OnGet()
+        {
             var receivedSubjects = _homeworkService.GetSubjects();
             Input = new List<InputModel>();
             for (var i = 0; i < receivedSubjects.Count; i++)
@@ -41,10 +45,6 @@ namespace Yggdrasil.Pages.Study
                     });
                 }
             }
-        }
-
-        public IActionResult OnGet()
-        {
             return Page();
         }
 
@@ -62,7 +62,7 @@ namespace Yggdrasil.Pages.Study
             public int SubjectId { get; set; }
             public string Name { get; set; } = null!;
             public string? TeacherName { get; set; }
-            public List<HomeworkInputModel> Homeworks { get; set; }
+            public List<HomeworkInputModel> Homeworks { get; set; } = new();
 
             public class HomeworkInputModel
             {

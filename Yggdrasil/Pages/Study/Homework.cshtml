@@ -7,7 +7,7 @@
 
 @for (int i = 0; i < Model.Input.Count; i++)
 {
-    <h2>@Model.Input[i].Name</h2>
+    <h2 class="h2">@Model.Input[i].Name</h2>
 
     @for (int j = 0; j < Model.Input[i].Homeworks.Count; j++)
     {
@@ -40,10 +40,12 @@
             </tbody>
         </table>
         <form method="get">
-            <input type="submit" class="btn primary-btn" asp-page="HomeworksUpdate" asp-route-id="@Model.Input[i].Homeworks[j].Id" asp-route-subjectname="@Model.Input[i].Name" value="Изменить"/>
+            <input type="submit" class="btn primary-btn" asp-page="HomeworkUpdate" asp-route-id="@Model.Input[i].Homeworks[j].Id" asp-route-subjectname="@Model.Input[i].Name" value="Изменить"/>
         </form>
-        <button class="btn primary-btn">Удалить</button>
     }
+    <form method="post">
+        <input type="submit" class="btn primary-btn" asp-page="HomeworkAdd" asp-route-subjectId="@Model.Input[i].SubjectId" value="Добавить"/>
+    </form>
 
 
 }

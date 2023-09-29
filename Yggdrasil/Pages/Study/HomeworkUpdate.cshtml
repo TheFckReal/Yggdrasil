@@ -1,0 +1,30 @@
+﻿@page "{id}/{subjectname?}"
+@model Yggdrasil.Pages.Study.HomeworksUpdateModel
+@{
+}
+<h2 class="h2">@Model.Input.SubjectName</h2>
+@if (Model.Input.InputHomework is not null)
+{
+    <form method="post" asp-page="HomeworkUpdate">
+        <div class="input-group form-control mb-3">
+            <input type="hidden" asp-for="Input.SubjectName"/>
+            <input type="hidden" asp-for="@Model.Input.InputHomework.Id"/>
+            <span class="input-group-text" id="basic-addon1">Задание</span>
+            <input class="form-control" asp-for="@Model.Input.InputHomework.Description" aria-label="Description">
+            <span class="input-group-text" id="basic-addon1">Дедлайн</span>
+            <input class="form-control" type="datetime-local" asp-for="Input.InputHomework.Deadline"/>
+            <span class="input-group-text" id="basic-addon1">Завершен?</span>
+            <div class="input-group-text">
+                <input class="form-check-input form-control mt-0" asp-for="@Model.Input.InputHomework.Finished" type="checkbox" aria-describedby="basic-addon1">
+            </div>
+        </div>
+        <div asp-validation-summary="All" class="list-group"></div>
+        <button asp-page-handler="Update" type="submit" class="btn btn-success">Сохранить</button>
+        <button asp-page-handler="Delete" type="submit" class="btn btn-danger">Удалить</button>
+        <a class="btn btn-warning" asp-page="Homework">Отменить</a>
+    </form>
+}
+else
+{
+    <strong>Задания отсутствуют</strong>
+}

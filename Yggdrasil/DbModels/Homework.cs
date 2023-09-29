@@ -15,5 +15,7 @@ public partial class Homework
 
     public int? Subjectid { get; set; }
 
+    public virtual ICollection<File> Files { get; set; } = new List<File>();
+
     public virtual Subject? Subject { get; set; }
 }

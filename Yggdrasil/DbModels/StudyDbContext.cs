@@ -6,17 +6,14 @@ namespace Yggdrasil.DbModels;
 
 public partial class StudyDbContext : DbContext
 {
+
     IConfiguration _configuration { get; init; }
     public StudyDbContext(IConfiguration conf)
     {
         _configuration = conf;
     }
 
-    //public StudyDbContext(DbContextOptions<StudyDbContext> options)
-    //    : base(options)
-    //{
-        
-    //}
+    public virtual DbSet<File> Files { get; set; }
 
     public virtual DbSet<Homework> Homeworks { get; set; }
 
@@ -27,6 +24,18 @@ public partial class StudyDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<File>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("Files_pk");
+
+            entity.ToTable("files");
+
+            entity.HasOne(d => d.Homework).WithMany(p => p.Files)
+                .HasForeignKey(d => d.HomeworkId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("Files_homework_id_fk");
+        });
+
         modelBuilder.Entity<Homework>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("homework_pkey");
