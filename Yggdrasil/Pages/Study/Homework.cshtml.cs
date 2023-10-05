@@ -20,9 +20,9 @@ namespace Yggdrasil.Pages.Study
             _homeworkService = homeworkService;
         }
 
-        public IActionResult OnGet()
+        public async Task<IActionResult> OnGetAsync()
         {
-            var receivedSubjects = _homeworkService.GetSubjects();
+            var receivedSubjects = await _homeworkService.GetSubjectsAsync(true);
             Input = new List<InputModel>();
             for (var i = 0; i < receivedSubjects.Count; i++)
             {
@@ -40,10 +40,11 @@ namespace Yggdrasil.Pages.Study
                         Deadline = receivedHomeworks.Deadline,
                         Description = receivedHomeworks.Description,
                         Finished = receivedHomeworks.Finished,
-                        Id = receivedHomeworks.Id
-
+                        Id = receivedHomeworks.Id,
+                        Files = receivedHomeworks.Files.ToList()
                     });
                 }
+
             }
             return Page();
         }
@@ -71,6 +72,7 @@ namespace Yggdrasil.Pages.Study
                 public DateTime Deadline { get; set; }
                 [Required]
                 public bool Finished { get; set; }
+                public List<DbModels.File>? Files { get; set; }
             }
         }
     }

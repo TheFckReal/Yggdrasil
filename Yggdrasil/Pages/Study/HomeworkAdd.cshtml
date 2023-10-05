@@ -4,12 +4,13 @@
 }
 <h2 class="h2">@Model.InputedSubject.Name</h2>
 <form method="post" asp-page="HomeworkUpdate" enctype="multipart/form-data">
+    <input type="hidden" asp-for="Input.SubjectName" value="@Model.InputedSubject.Name" />
     <div class="input-group form-control mb-3">
-        <input type="hidden" asp-for="Input.SubjectId" value="@Model.InputedSubject.Id" />
+        <input type="hidden" asp-for="Input.SubjectId" value="@Model.InputedSubject.Id"/>
         <span class="input-group-text" id="basic-addon1">Задание</span>
         <input class="form-control" asp-for="@Model.Input.Description" aria-label="Description">
         <span class="input-group-text" id="basic-addon1">Дедлайн</span>
-        <input class="form-control" type="datetime-local" asp-for="Input.Deadline" />
+        <input class="form-control" type="datetime-local" asp-for="Input.Deadline"/>
         <span class="input-group-text" id="basic-addon1">Завершен?</span>
         <div class="input-group-text">
             <input class="form-check-input form-control mt-0" asp-for="@Model.Input.Finished" type="checkbox" aria-describedby="basic-addon1">

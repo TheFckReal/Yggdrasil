@@ -5,17 +5,30 @@
 <h2 class="h2">@Model.Input.SubjectName</h2>
 @if (Model.Input.InputHomework is not null)
 {
-    <form method="post" asp-page="HomeworkUpdate">
+    <form method="post" asp-page="HomeworkUpdate" enctype="multipart/form-data">
         <div class="input-group form-control mb-3">
-            <input type="hidden" asp-for="Input.SubjectName"/>
-            <input type="hidden" asp-for="@Model.Input.InputHomework.Id"/>
+            <input type="hidden" asp-for="Input.SubjectName" />
+            <input type="hidden" asp-for="@Model.Input.InputHomework.Id" />
             <span class="input-group-text" id="basic-addon1">Задание</span>
             <input class="form-control" asp-for="@Model.Input.InputHomework.Description" aria-label="Description">
             <span class="input-group-text" id="basic-addon1">Дедлайн</span>
-            <input class="form-control" type="datetime-local" asp-for="Input.InputHomework.Deadline"/>
+            <input class="form-control" type="datetime-local" asp-for="Input.InputHomework!.Deadline" />
+            <div class="form-control">
+                @foreach (var file in @Model.Input.InputHomework.ExistingFiles)
+                {
+                    <a class="btn btn-outline-primary" asp-page="Download" asp-route-fileid="@file.Id">@file.Name</a> <br />
+                    @* <button id="@($"inp_{file.Id}")" type="submit" asp-page="Download">@file.Name</button> *@
+                }
+                @if (@Model.Input.InputHomework.NewFiles.Count > 0)
+                {
+                    <input asp-for="@Model.Input.InputHomework.NewFiles" />
+                }
+                    
+            </div>
             <span class="input-group-text" id="basic-addon1">Завершен?</span>
             <div class="input-group-text">
-                <input class="form-check-input form-control mt-0" asp-for="@Model.Input.InputHomework.Finished" type="checkbox" aria-describedby="basic-addon1">
+                <input asp-for="@Model.Input.InputHomework.Finished" autocomplete="off" class="btn-check" aria-describedby="basic-addon1">
+                <label class="btn btn-outline-primary" asp-for="@Model.Input.InputHomework.Finished">Выполнено?</label>
             </div>
         </div>
         <div asp-validation-summary="All" class="list-group"></div>

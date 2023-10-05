@@ -1,24 +1,28 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.CodeAnalysis.Options;
+using Microsoft.Extensions.Options;
 using Yggdrasil.DbModels;
+using Yggdrasil.OptionsModels;
 using Yggdrasil.Services;
 using static System.Net.Mime.MediaTypeNames;
+using File = System.IO.File;
 
 namespace Yggdrasil.Pages.Study
 {
     public class HomeworkAddModel : PageModel
     {
         private readonly IHomeworkService _homeworkService;
-        private readonly IConfiguration _configuration;
-        public HomeworkAddModel(IHomeworkService homeworkService, IConfiguration configuration)
+        private readonly IOptions<FileSettings> _fileSettings;
+        public HomeworkAddModel(IHomeworkService homeworkService, IOptions<FileSettings> fileOption)
         {
             _homeworkService = homeworkService;
-            _configuration = configuration;
+            _fileSettings = fileOption;
         }
 
-        public Subject InputedSubject { get; set; }
-        public InputModel Input { get; set; }
+        public Subject InputedSubject { get; set; } = null!;
+        public InputModel Input { get; set; } = null!;
 
         public IActionResult OnPost([Required] int? subjectId)
         {
@@ -35,38 +39,34 @@ namespace Yggdrasil.Pages.Study
 
         public async Task<IActionResult> OnPostInsertAsync([Required] InputModel input)
         {
+            Input = input;
+            InputedSubject = new() { Name = input?.SubjectName ?? "Default" };
             if (!ModelState.IsValid)
             {
-                return BadRequest();
+                return Page();
             }
             else
             {
-                if (input.FormFiles is not null)
+                if (input!.FormFiles is not null)
                 {
-                    if (input.FormFiles.Count() > 3)
+                    int maxFiles = _fileSettings.Value.MaxFilesPerHomework;
+                    if (input.FormFiles.Count() > maxFiles)
                     {
-                        ModelState.AddModelError(nameof(input.FormFiles), $"Нельзя загружать более 3 файлов");
-                        return BadRequest();
-                    } 
+                        ModelState.AddModelError(nameof(input.FormFiles), $"Нельзя загружать более {maxFiles} файлов");
+                        return Page();
+                    }
 
-                    long sizeLimit = _configuration.GetValue<long>("FileSizeLimit");
-                    string[] permittedExtensions = { ".txt", ".pdf" };
+                    long sizeLimit = _fileSettings.Value.FileSizeLimit;
+                    var permittedExtensions = _fileSettings.Value.AllowedExtensions!;
                     foreach (var file in input.FormFiles)
                     {
                         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
                         if (file.Length > sizeLimit || string.IsNullOrEmpty(extension) || !permittedExtensions.Contains(extension))
                         {
-                            ModelState.AddModelError(nameof(input.FormFiles), $"Размер файла не может превышать {sizeLimit / 2048} Мб, иметь формат, отличный от .txt и .pdf, а также нельзя загружать более 3 файлов");
-                            return BadRequest();
+                            ModelState.AddModelError(nameof(input.FormFiles), $"Размер файла не может превышать {sizeLimit / (1024 * 1024)} Мб, иметь формат, отличный от .txt и .pdf, а также нельзя загружать более {maxFiles} файлов");
+                            return Page();
                         }
                     }
-                }
-            }
-            if (input.FormFiles is not null)
-            {
-                foreach (var file in input.FormFiles)
-                {
-                    
                 }
             }
 
@@ -77,16 +77,17 @@ namespace Yggdrasil.Pages.Study
                 Finished = input.Finished,
                 Subjectid = input.SubjectId!.Value,
             };
-            foreach (var file in input.FormFiles)
-            {
-                using MemoryStream memoryStream = new MemoryStream();
-                await file.CopyToAsync(memoryStream);
-                newHomework.Files.Add(new ()
+            if (input.FormFiles is not null)
+                foreach (var file in input.FormFiles)
                 {
-                    Name = Path.GetRandomFileName(),
-                    Data = memoryStream.ToArray(),
-                });
-            }
+                    using MemoryStream memoryStream = new MemoryStream();
+                    await file.CopyToAsync(memoryStream);
+                    newHomework.Files.Add(new()
+                    {
+                        Name = Path.GetFileName(file.FileName),
+                        Data = memoryStream.ToArray(),
+                    });
+                }
 
             await _homeworkService.InsertHomeworkAsync(newHomework);
             return RedirectToPage("Homework");
@@ -102,7 +103,8 @@ namespace Yggdrasil.Pages.Study
             [DataType(DataType.DateTime)]
             public DateTime? Deadline { get; set; }
             public bool Finished { get; set; }
-            public IEnumerable<IFormFile> FormFiles { get; set; } = null;
+            public IEnumerable<IFormFile>? FormFiles { get; set; } = null!;
+            public string? SubjectName { get; set; } = null;
         }
 
 

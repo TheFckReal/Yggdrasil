@@ -1,7 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Options;
 using Yggdrasil.DbModels;
+using Yggdrasil.OptionsModels;
 using Yggdrasil.Services;
 
 namespace Yggdrasil.Pages.Study
@@ -9,15 +11,18 @@ namespace Yggdrasil.Pages.Study
     public class HomeworksUpdateModel : PageModel
     {
         private readonly IHomeworkService _homeworkService;
-
-        public HomeworksUpdateModel(IHomeworkService homeworkService)
+        private readonly IOptions<FileSettings> _fileSettings;
+        private readonly IFileService _fileService;
+        public HomeworksUpdateModel(IHomeworkService homeworkService, IOptions<FileSettings> fileSettings, IFileService fileService)
         {
             _homeworkService = homeworkService;
+            _fileSettings = fileSettings;
+            _fileService = fileService;
         }
 
-        [BindProperty] public InputModel Input { get; set; } = new InputModel();
+        [BindProperty] public InputModel Input { get; set; }
 
-        public IActionResult OnGet(int id, string? subjectName)
+        public async Task<IActionResult> OnGetAsync(int id, string? subjectName)
         {
             if (!ModelState.IsValid)
             {
@@ -39,9 +44,20 @@ namespace Yggdrasil.Pages.Study
                         Deadline = receivedHomework.Deadline,
                         Description = receivedHomework.Description,
                         Id = receivedHomework.Id,
-                        Finished = receivedHomework.Finished
+                        Finished = receivedHomework.Finished,
                     }
                 };
+                var exisingFiles = await _homeworkService.GetNoDataFilesByHomeworkIdAsync(id);
+                foreach (var file in exisingFiles)
+                {
+                    Input.InputHomework.ExistingFiles.Add(new()
+                    {
+                        Id = file.Id,
+                        Name = file.Name
+                    });
+                }
+
+                Input.InputHomework.NewFiles = new(new IFormFile[_fileSettings.Value.MaxFilesPerHomework - exisingFiles.Count()]); // Ошибка с capacity и индексатором
             }
             return Page();
         }
@@ -63,13 +79,38 @@ namespace Yggdrasil.Pages.Study
                 return Page();
             }
 
-            await _homeworkService.UpdateHomeworkAsync(new()
+            if (!_fileService.IsFilesValidForHomework(Input.InputHomework.NewFiles!, true))
+            {
+                ModelState.AddModelError(nameof(Input.InputHomework.NewFiles), _fileService.ErrorMessageForHomework());
+                return Page();
+            } else if (Input.InputHomework.NewFiles.Count + Input.InputHomework.ExistingFiles.Count > _fileSettings.Value.MaxFilesPerHomework)
+            {
+                ModelState.AddModelError(nameof(Input.InputHomework.NewFiles), _fileService.ErrorMessageForHomework());
+                return Page();
+            }
+
+            HomeworkForUpdate updateHomework = new()
             {
                 Id = Input.InputHomework.Id,
                 Deadline = Input.InputHomework.Deadline!.Value,
                 Description = Input.InputHomework.Description,
                 Finished = Input.InputHomework.Finished
-            });
+            };
+            if (Input.InputHomework.NewFiles is not null)
+            {
+                updateHomework.Files = new();
+                foreach (var file in Input.InputHomework.NewFiles)
+                {
+                    using MemoryStream memoryStream = new MemoryStream();
+                    await file.CopyToAsync(memoryStream);
+                    updateHomework.Files.Add(new()
+                    {
+                        Name = Path.GetFileName(file.FileName),
+                        Data = memoryStream.ToArray(),
+                    });
+                }
+            }
+            await _homeworkService.UpdateHomeworkAsync(updateHomework);
             return RedirectToPage("Homework");
         }
 
@@ -88,6 +129,17 @@ namespace Yggdrasil.Pages.Study
                 public DateTime? Deadline { get; set; }
                 [Required]
                 public bool Finished { get; set; }
+
+                public List<IFormFile> NewFiles { get; set; } = new();
+                public List<InputFile> ExistingFiles { get; set; } = new();
+                public class InputFile
+                {
+                    [Required]
+                    [MaxLength(50, ErrorMessage = "Название файла не может превышать 50 символов")]
+                    public string Name { get; set; } = null!;
+                    [Required]
+                    public int Id { get; set; }
+                }
             }
         }
     }

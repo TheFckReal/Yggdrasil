@@ -9,42 +9,60 @@
 {
     <h2 class="h2">@Model.Input[i].Name</h2>
 
-    @for (int j = 0; j < Model.Input[i].Homeworks.Count; j++)
-    {
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">Задание</th>
-                    <th scope="col">Дедлайн</th>
-                    <th scope="col">Сделано?</th>
-                </tr>
-            </thead>
-            <tbody>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Задание</th>
+                <th scope="col">Дедлайн</th>
+                <th scope="col">Сделано?</th>
+                <th scope="col">Файлы</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int j = 0; j < Model.Input[i].Homeworks.Count; j++)
+            {
                 <tr>
                     <td>@Model.Input[i].Homeworks[j].Description</td>
                     <td>@Model.Input[i].Homeworks[j].Deadline</td>
                     <td>
-                        <form method="post">
+                        <form>
                             @if (Model.Input[i].Homeworks[j].Finished)
                             {
-                                <input class="form-check-input" type="checkbox" readonly="readonly" checked>
+                                <input asp-for="@Model.Input[i].Homeworks[j].Finished" autocomplete="off" class="btn-check" readonly checked disabled="disabled">
+                                <label class="btn btn-outline-primary" asp-for="@Model.Input[i].Homeworks[j].Finished">Выполнено</label>
                             }
                             else
                             {
-                                <input class="form-check-input" type="checkbox" readonly="readonly">
+                                <input asp-for="@Model.Input[i].Homeworks[j].Finished" autocomplete="off" class="btn-check" readonly disabled="disabled">
+                                <label class="btn btn-outline-primary" asp-for="@Model.Input[i].Homeworks[j].Finished">Невыполнено</label>
                             }
 
                         </form>
                     </td>
+                    <td>
+                        @if (@Model.Input[i].Homeworks[j].Files is not null)
+                        {
+                            @foreach (var file in @Model.Input[i].Homeworks[j].Files)
+                            {
+                                <form method="post">
+                                    <input type="hidden" name="fileid" value="@file.Id"/>
+                                    <button type="submit" asp-page="Download">@file.Name</button>
+                                    <br/>
+                                </form>
+                            }
+                        }
+                    </td>
+                    <td>
+                        <form method="get">
+                            <input type="submit" class="btn btn-outline-primary" asp-page="HomeworkUpdate" asp-route-id="@Model.Input[i].Homeworks[j].Id" asp-route-subjectname="@Model.Input[i].Name" value="Изменить" />
+                        </form>
+                    </td>
                 </tr>
-            </tbody>
-        </table>
-        <form method="get">
-            <input type="submit" class="btn primary-btn" asp-page="HomeworkUpdate" asp-route-id="@Model.Input[i].Homeworks[j].Id" asp-route-subjectname="@Model.Input[i].Name" value="Изменить"/>
-        </form>
-    }
+            }
+        </tbody>
+    </table>
     <form method="post">
-        <input type="submit" class="btn primary-btn" asp-page="HomeworkAdd" asp-route-subjectId="@Model.Input[i].SubjectId" value="Добавить"/>
+        <input type="submit" class="btn btn-primary" asp-page="HomeworkAdd" asp-route-subjectId="@Model.Input[i].SubjectId" value="Добавить" />
     </form>
 
 
