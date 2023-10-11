@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "postgresql1": {
+      "type": "postgresql",
+      "connectionId": "DbSettings:ConnectionStr",
+      "dynamicId": null
+    }
+  }
+}

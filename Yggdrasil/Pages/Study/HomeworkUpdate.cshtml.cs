@@ -83,7 +83,7 @@ namespace Yggdrasil.Pages.Study
             {
                 ModelState.AddModelError(nameof(Input.InputHomework.NewFiles), _fileService.ErrorMessageForHomework());
                 return Page();
-            } else if (Input.InputHomework.NewFiles.Count + Input.InputHomework.ExistingFiles.Count > _fileSettings.Value.MaxFilesPerHomework)
+            } else if (Input.InputHomework.NewFiles?.Count + Input.InputHomework.ExistingFiles.Count > _fileSettings.Value.MaxFilesPerHomework)
             {
                 ModelState.AddModelError(nameof(Input.InputHomework.NewFiles), _fileService.ErrorMessageForHomework());
                 return Page();
@@ -130,7 +130,7 @@ namespace Yggdrasil.Pages.Study
                 [Required]
                 public bool Finished { get; set; }
 
-                public List<IFormFile> NewFiles { get; set; } = new();
+                public List<IFormFile>? NewFiles { get; set; } = new();
                 public List<InputFile> ExistingFiles { get; set; } = new();
                 public class InputFile
                 {

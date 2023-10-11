@@ -24,6 +24,7 @@ namespace Yggdrasil
             services.AddDbContext<StudyDbContext>();
             services.AddScoped<IHomeworkService, HomeworkService>();
             services.AddScoped<IFileService,  FileService>();
+            services.AddHttpClient();
         }
 
         public void Configure(IApplicationBuilder app, IHostEnvironment env)

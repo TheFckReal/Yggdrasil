@@ -1,3 +1,4 @@
+using System.Text;
 using Microsoft.AspNetCore.Server.IIS.Core;
 
 namespace Yggdrasil
@@ -18,6 +19,7 @@ namespace Yggdrasil
                 {
 
                 });
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             });
     }
 }
